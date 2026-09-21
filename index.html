@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Smart Cutz — Salon Manager</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Rubik:wght@400;500;700&family=Noto+Kufi+Arabic:wght@400;700&display=swap">
+<style>
+:root{--bg:#F6F2EA;--panel:#fff;--ink:#17130D;--ink2:#6B6252;--line:#E3DCCB;--gold:#B8860B;--gold2:#8F6707;--green:#2E7D4F;--red:#B23A2F;--blue:#2C5F9E;--side:#17130D}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Rubik',Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:15px}
+body[dir=rtl]{font-family:'Noto Kufi Arabic','Rubik',sans-serif}
+h1,h2,h3{font-family:'Cormorant Garamond',Georgia,serif;margin:0;font-weight:700}
+body[dir=rtl] h1,body[dir=rtl] h2,body[dir=rtl] h3{font-family:'Noto Kufi Arabic',sans-serif}
+.app{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+aside{background:var(--side);color:#fff;padding:20px 14px;display:flex;flex-direction:column;gap:6px;position:sticky;top:0;height:100vh}
+.logo{display:flex;align-items:center;gap:10px;padding:6px 8px 18px;font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--gold)}
+.logo i{width:30px;height:30px;border:2px solid var(--gold);border-radius:50%;display:inline-grid;place-items:center;font-size:13px;font-family:'Rubik';font-weight:700}
+.navbtn{background:none;border:0;color:#fff;opacity:.75;text-align:start;padding:10px 12px;border-radius:8px;font:inherit;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.navbtn:hover{opacity:1;background:#ffffff14}
+.navbtn.active{opacity:1;background:var(--gold);color:#17130D;font-weight:500}
+.navbtn .badge{background:#00000033;border-radius:999px;padding:1px 8px;font-size:12px}
+aside .spacer{flex:1}
+.langbtn{border:1px solid #ffffff55;background:none;color:#fff;border-radius:999px;padding:6px 12px;cursor:pointer;font:inherit}
+main{padding:22px 28px;display:grid;gap:18px;align-content:start}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.topbar h1{font-size:34px}
+.btn{border:0;border-radius:8px;padding:10px 16px;font:inherit;font-weight:500;cursor:pointer;background:#EDE6D6;color:var(--ink)}
+.btn.primary{background:var(--gold);color:#17130D}
+.btn.dark{background:var(--ink);color:#fff}
+.btn.green{background:var(--green);color:#fff}
+.btn.sm{padding:6px 10px;font-size:13px}
+.btn.ghost{background:transparent;border:1px solid var(--line)}
+.kpis{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;border-inline-start:5px solid var(--gold)}
+.kpi .v{font-family:'Cormorant Garamond',serif;font-size:36px;line-height:1;font-weight:700}
+.kpi .l{color:var(--ink2);font-size:13px;margin-top:6px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px}
+.panel h2{font-size:24px;margin-bottom:12px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:start;color:var(--ink2);font-weight:500;font-size:12px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;border-bottom:1px solid var(--line)}
+body[dir=rtl] th{letter-spacing:0}
+td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tag{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:500;background:#EDE6D6}
+.tag.booked{background:#E3ECF7;color:var(--blue)}.tag.waiting{background:#FBEFD2;color:#7A5300}.tag.inchair,.tag.serving{background:#DCEFE2;color:var(--green)}.tag.done,.tag.paid,.tag.active{background:#DCEFE2;color:var(--green)}.tag.noshow,.tag.cancelled,.tag.lapsed{background:#F9DCDA;color:var(--red)}.tag.member{background:#F3E4BF;color:var(--gold2)}
+.grid2{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+label{display:grid;gap:4px;font-size:13px;font-weight:500;color:var(--ink2)}
+input,select,textarea{font:inherit;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);width:100%}
+.modal-bg{position:fixed;inset:0;background:#0007;display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border-radius:14px;padding:22px;width:min(900px,100%);max-height:92vh;overflow:auto;display:grid;gap:14px}
+.modal h2{font-size:26px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.right{margin-inline-start:auto}
+.muted{color:var(--ink2);font-size:13px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+/* booking grid */
+.sched{display:grid;grid-template-columns:70px repeat(var(--n),1fr);border:1px solid var(--line);border-radius:10px;overflow:hidden;font-size:13px}
+.sched .hd{background:#EDE6D6;padding:8px;font-weight:500;text-align:center;border-bottom:1px solid var(--line)}
+.sched .tm{padding:4px 6px;color:var(--ink2);border-top:1px solid var(--line);font-size:12px;height:34px}
+.sched .slot{border-top:1px solid var(--line);border-inline-start:1px solid var(--line);height:34px;cursor:pointer;position:relative}
+.sched .slot:hover{background:#FBF6E8}
+.sched .slot.half{border-top-style:dashed}
+.bk{position:absolute;inset:2px;border-radius:6px;padding:3px 6px;font-size:12px;line-height:1.2;overflow:hidden;background:#E3ECF7;color:var(--blue);border-inline-start:3px solid var(--blue);z-index:2}
+.bk.serving{background:#DCEFE2;color:var(--green);border-color:var(--green)}.bk.done{background:#eee;color:#666;border-color:#999}.bk.noshow{background:#F9DCDA;color:var(--red);border-color:var(--red)}
+/* queue */
+.qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;gap:6px}
+.qcard b{font-size:17px}
+.qn{font-family:'Cormorant Garamond',serif;font-size:34px;color:var(--gold);line-height:1}
+/* POS */
+.pos{display:grid;grid-template-columns:1.4fr 1fr;gap:16px}
+.svcgrid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.svc{border:1px solid var(--line);border-radius:10px;padding:12px;cursor:pointer;background:#fff;display:grid;gap:4px}
+.svc:hover{border-color:var(--gold)}
+.svc .p{font-weight:700;color:var(--gold2)}
+.svc.line{border-inline-start:4px solid var(--gold)}
+.cart{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:10px;align-content:start}
+.cart .tot{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:700;text-align:end}
+.toast{position:fixed;bottom:18px;inset-inline-start:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:999px;font-size:14px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:60}
+.toast.show{opacity:1}
+.bar{height:8px;background:#EDE6D6;border-radius:4px;overflow:hidden}.bar i{display:block;height:100%;background:var(--gold)}
+@media(max-width:900px){.app{grid-template-columns:1fr}aside{position:static;height:auto;flex-direction:row;flex-wrap:wrap}.logo{width:100%}.two,.pos{grid-template-columns:1fr}main{padding:14px}}
+@media print{aside,.topbar,.noprint{display:none!important}.app{display:block}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside>
+  <div class="logo"><i>SC</i><span data-t="brand">Smart Cutz</span></div>
+  <div id="nav"></div>
+  <div class="spacer"></div>
+  <button class="langbtn" onclick="toggleLang()" id="langbtn">العربية</button>
+  <p class="muted" style="color:#ffffff88;font-size:12px;margin:10px 4px 0" data-t="demo">Demo build — data saved in this browser</p>
+</aside>
+<main id="main"></main>
+</div>
+<div class="modal-bg" id="modalbg" onclick="if(event.target===this)closeModal()"><div class="modal" id="modal"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const I18N={
+ en:{brand:'Smart Cutz',demo:'Demo build — data saved in this browser',dashboard:'Dashboard',bookings:'Bookings',queue:'Walk-in queue',pos:'Checkout',clients:'Clients',services:'Services & products',barbers:'Barbers',reports:'Reports',settings:'Settings',
+  todayRev:"Today's takings",servicesToday:'Services today',avgTicket:'Average ticket',waiting:'Waiting now',bookedToday:'Booked today',members:'Active members',
+  newBooking:'New booking',addWalkin:'Add walk-in',client:'Client',barber:'Barber',service:'Service',time:'Time',date:'Date',status:'Status',phone:'Phone',name:'Name',notes:'Notes',actions:'Actions',
+  save:'Save',cancel:'Cancel',delete:'Delete',start:'Start',checkout:'Checkout',noShow:'No-show',done:'Done',any:'Any barber',estWait:'Est. wait',min:'min',position:'No.',
+  addService:'Add service',addProduct:'Add product',price:'Price (QAR)',duration:'Duration (min)',line:'Line',product:'Product',stock:'Stock',commission:'Commission %',
+  cart:'Basket',total:'Total',discount:'Discount (QAR)',method:'Payment',cash:'Cash',card:'Card',pay:'Take payment',clearCart:'Clear',membership:'Membership',redeem:'Use membership visit',visitsLeft:'visits left',
+  lastVisit:'Last visit',visits:'Visits',spent:'Spent',prefBarber:'Preferred barber',newClient:'New client',remind:'Remind on WhatsApp',lapsed:'Not seen 5+ weeks',dueBack:'Due back (3+ weeks)',
+  takingsBy:'Takings by barber (this month)',commissionRep:'Commission due',retention:'Retention',retailShare:'Retail share',daily:'Last 7 days',serviceMix:'Service mix (this month)',
+  salonName:'Salon name',open:'Opening hour',close:'Closing hour',slot:'Slot (min)',plans:'Membership plans',planName:'Plan',visits2:'Visits / month',sell:'Sell membership',
+  todayLabel:'Today',prev:'◀',next:'▶',noData:'Nothing here yet.',all:'All',receipt:'Receipt',thanks:'Thank you — see you in 3 weeks!',tip:'Tip',
+  st:{Booked:'Booked',Waiting:'Waiting',Serving:'In chair',Done:'Done',NoShow:'No-show',Cancelled:'Cancelled',Active:'Active',Lapsed:'Lapsed'},
+  lines:{Smart:'Smart',Relax:'Relax',Signature:'Signature',Kids:'Kids',Retail:'Retail'}},
+ ar:{brand:'سمارت كتز',demo:'نسخة تجريبية — البيانات محفوظة في هذا المتصفح',dashboard:'لوحة التحكم',bookings:'الحجوزات',queue:'طابور الانتظار',pos:'الدفع',clients:'العملاء',services:'الخدمات والمنتجات',barbers:'الحلاقون',reports:'التقارير',settings:'الإعدادات',
+  todayRev:'إيرادات اليوم',servicesToday:'خدمات اليوم',avgTicket:'متوسط الفاتورة',waiting:'في الانتظار الآن',bookedToday:'حجوزات اليوم',members:'الأعضاء النشطون',
+  newBooking:'حجز جديد',addWalkin:'إضافة زائر',client:'العميل',barber:'الحلاق',service:'الخدمة',time:'الوقت',date:'التاريخ',status:'الحالة',phone:'الهاتف',name:'الاسم',notes:'ملاحظات',actions:'إجراءات',
+  save:'حفظ',cancel:'إلغاء',delete:'حذف',start:'بدء',checkout:'الدفع',noShow:'لم يحضر',done:'تم',any:'أي حلاق',estWait:'الانتظار المتوقع',min:'دقيقة',position:'رقم',
+  addService:'إضافة خدمة',addProduct:'إضافة منتج',price:'السعر (ر.ق)',duration:'المدة (دقيقة)',line:'الفئة',product:'المنتج',stock:'المخزون',commission:'العمولة %',
+  cart:'السلة',total:'الإجمالي',discount:'خصم (ر.ق)',method:'طريقة الدفع',cash:'نقداً',card:'بطاقة',pay:'تحصيل',clearCart:'مسح',membership:'الاشتراك',redeem:'استخدام زيارة الاشتراك',visitsLeft:'زيارات متبقية',
+  lastVisit:'آخر زيارة',visits:'الزيارات',spent:'الإنفاق',prefBarber:'الحلاق المفضل',newClient:'عميل جديد',remind:'تذكير عبر واتساب',lapsed:'لم يزر منذ 5+ أسابيع',dueBack:'موعد العودة (3+ أسابيع)',
+  takingsBy:'الإيرادات حسب الحلاق (هذا الشهر)',commissionRep:'العمولة المستحقة',retention:'الاحتفاظ بالعملاء',retailShare:'حصة المنتجات',daily:'آخر 7 أيام',serviceMix:'توزيع الخدمات (هذا الشهر)',
+  salonName:'اسم الصالون',open:'ساعة الفتح',close:'ساعة الإغلاق',slot:'مدة الفترة (دقيقة)',plans:'خطط الاشتراك',planName:'الخطة',visits2:'زيارات / شهر',sell:'بيع اشتراك',
+  todayLabel:'اليوم',prev:'▶',next:'◀',noData:'لا يوجد شيء بعد.',all:'الكل',receipt:'إيصال',thanks:'شكراً — نراك بعد 3 أسابيع!',tip:'إكرامية',
+  st:{Booked:'محجوز',Waiting:'ينتظر',Serving:'على الكرسي',Done:'تم',NoShow:'لم يحضر',Cancelled:'ملغي',Active:'نشط',Lapsed:'منقطع'},
+  lines:{Smart:'سمارت',Relax:'ريلاكس',Signature:'سيجنتشر',Kids:'أطفال',Retail:'منتجات'}}
+};
+let lang='en';const t=k=>I18N[lang][k]??k;const ts=s=>I18N[lang].st[s]??s;const tl=s=>I18N[lang].lines[s]??s;
+const fmt=n=>'QAR '+(Math.round((n||0)*100)/100).toLocaleString('en');
+const today=()=>new Date().toISOString().slice(0,10);
+const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x.toISOString().slice(0,10)};
+const daysBetween=(a,b)=>Math.round((new Date(b)-new Date(a))/86400000);
+const uid=()=>Math.random().toString(36).slice(2,8).toUpperCase();
+const nowHM=()=>{const d=new Date();return d.getHours()*60+d.getMinutes()};
+const hm=m=>`${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;
+
+function seed(){
+ const T=today();
+ const services=[
+  {id:'s1',name:'Haircut',ar:'قص شعر',line:'Smart',price:25,dur:30},{id:'s2',name:'Beard shaping',ar:'تشذيب اللحية',line:'Smart',price:15,dur:15},{id:'s3',name:'Smart Saver (cut + beard + scrub)',ar:'سمارت سيفر',line:'Smart',price:25,dur:35},
+  {id:'s4',name:'Relax (cut + beard + wash + oil massage + scrub)',ar:'ريلاكس',line:'Relax',price:35,dur:45},{id:'s5',name:'Hair wash + head massage',ar:'غسيل + مساج',line:'Relax',price:15,dur:15},
+  {id:'s6',name:'Signature (premium cut + beard design + facial + styling)',ar:'سيجنتشر',line:'Signature',price:75,dur:60},{id:'s7',name:'Hot-towel facial',ar:'عناية بالوجه',line:'Signature',price:35,dur:25},{id:'s8',name:'Hair colour',ar:'صبغة شعر',line:'Signature',price:40,dur:30},
+  {id:'s9',name:"Kids' cut (under 12)",ar:'قصة أطفال',line:'Kids',price:20,dur:25}];
+ const products=[{id:'p1',name:'Beard oil 30ml',ar:'زيت لحية',price:35,stock:14,cost:18},{id:'p2',name:'Pomade',ar:'بوماد',price:45,stock:9,cost:22},{id:'p3',name:'Beard balm',ar:'بلسم لحية',price:30,stock:6,cost:14},{id:'p4',name:'Trimmer',ar:'ماكينة حلاقة',price:120,stock:3,cost:80}];
+ const barbers=[{id:'b1',name:'Karim',comm:35,on:true},{id:'b2',name:'Yusuf',comm:35,on:true},{id:'b3',name:'Ravi',comm:30,on:true},{id:'b4',name:'Omar',comm:35,on:false}];
+ const plans=[{id:'pl1',name:'Smart Monthly',price:89,visits:3},{id:'pl2',name:'Signature Monthly',price:149,visits:3},{id:'pl3',name:'Father & Son',price:59,visits:3}];
+ const clients=[
+  {id:'c1',name:'Abdulla Al-Marri',phone:'+974 5511 0001',pref:'b1',member:{plan:'pl1',left:2,until:addDays(T,18)},notes:'Skin fade, keep top long'},
+  {id:'c2',name:'Mohammed Irfan',phone:'+974 5511 0002',pref:'b2',member:null,notes:''},
+  {id:'c3',name:'James Okoro',phone:'+974 5511 0003',pref:'b1',member:{plan:'pl2',left:1,until:addDays(T,9)},notes:'Beard design, no colour'},
+  {id:'c4',name:'Tariq & Zayd (son)',phone:'+974 5511 0004',pref:'b3',member:{plan:'pl3',left:3,until:addDays(T,25)},notes:'Weekend slots'},
+  {id:'c5',name:'Hassan Ali',phone:'+974 5511 0005',pref:'',member:null,notes:''},
+  {id:'c6',name:'Daniel Reyes',phone:'+974 5511 0006',pref:'b2',member:null,notes:'Textured crop'},
+  {id:'c7',name:'Saeed Al-Kaabi',phone:'+974 5511 0007',pref:'b1',member:null,notes:''},
+  {id:'c8',name:'Rahul Menon',phone:'+974 5511 0008',pref:'b3',member:null,notes:''}];
+ const sales=[];const mk=(d,c,b,items,method='cash',disc=0)=>{const tot=items.reduce((a,i)=>a+i.price*i.qty,0)-disc;sales.push({id:'R'+uid(),date:d,time:'18:30',client:c,barber:b,items,method,disc,total:tot})};
+ mk(addDays(T,-2),'c1','b1',[{id:'s4',name:'Relax',price:35,qty:1,type:'svc'},{id:'p1',name:'Beard oil 30ml',price:35,qty:1,type:'prod'}],'card');
+ mk(addDays(T,-3),'c2','b2',[{id:'s3',name:'Smart Saver',price:25,qty:1,type:'svc'}]);
+ mk(addDays(T,-5),'c3','b1',[{id:'s6',name:'Signature',price:75,qty:1,type:'svc'}],'card');
+ mk(addDays(T,-6),'c4','b3',[{id:'s1',name:'Haircut',price:25,qty:1,type:'svc'},{id:'s9',name:"Kids' cut",price:20,qty:2,type:'svc'}]);
+ mk(addDays(T,-9),'c6','b2',[{id:'s4',name:'Relax',price:35,qty:1,type:'svc'},{id:'p2',name:'Pomade',price:45,qty:1,type:'prod'}],'card');
+ mk(addDays(T,-24),'c5','b3',[{id:'s1',name:'Haircut',price:25,qty:1,type:'svc'}]);
+ mk(addDays(T,-40),'c7','b1',[{id:'s3',name:'Smart Saver',price:25,qty:1,type:'svc'}]);
+ mk(addDays(T,-45),'c8','b3',[{id:'s1',name:'Haircut',price:25,qty:1,type:'svc'},{id:'s2',name:'Beard shaping',price:15,qty:1,type:'svc'}]);
+ for(let i=1;i<=6;i++){mk(addDays(T,-i),'c2','b2',[{id:'s1',name:'Haircut',price:25,qty:1,type:'svc'}]);mk(addDays(T,-i),'c6','b1',[{id:'s4',name:'Relax',price:35,qty:1,type:'svc'}])}
+ mk(T,'c1','b1',[{id:'s6',name:'Signature',price:75,qty:1,type:'svc'},{id:'p3',name:'Beard balm',price:30,qty:1,type:'prod'}],'card');
+ mk(T,'c4','b3',[{id:'s3',name:'Smart Saver',price:25,qty:1,type:'svc'}]);
+ const bookings=[
+  {id:'k1',date:T,start:600,client:'c1',barber:'b1',svc:'s4',status:'Done'},{id:'k2',date:T,start:660,client:'c3',barber:'b1',svc:'s6',status:'Booked'},
+  {id:'k3',date:T,start:690,client:'c2',barber:'b2',svc:'s3',status:'Booked'},{id:'k4',date:T,start:780,client:'c6',barber:'b2',svc:'s4',status:'Booked'},
+  {id:'k5',date:T,start:960,client:'c4',barber:'b3',svc:'s9',status:'Booked'},{id:'k6',date:T,start:1080,client:'c5',barber:'b3',svc:'s1',status:'Booked'},
+  {id:'k7',date:addDays(T,1),start:630,client:'c7',barber:'b1',svc:'s6',status:'Booked'},{id:'k8',date:addDays(T,1),start:1020,client:'c8',barber:'b2',svc:'s1',status:'Booked'}];
+ const queue=[{id:'q1',n:12,name:'Walk-in — Faisal',phone:'',barber:'',svc:'s3',status:'Serving',at:nowHM()-20,barberOn:'b2'},{id:'q2',n:13,name:'Walk-in — Bilal',phone:'+974 5511 0099',barber:'b1',svc:'s1',status:'Waiting',at:nowHM()-8},{id:'q3',n:14,name:'Walk-in — Kevin',phone:'',barber:'',svc:'s4',status:'Waiting',at:nowHM()-3}];
+ return {services,products,barbers,plans,clients,sales,bookings,queue,settings:{name:'Smart Cutz Salon',open:9,close:23,slot:30,cr:'C.R. 212606',phone:'+974 XXXX XXXX'},qn:15};
+}
+let S;try{S=JSON.parse(localStorage.getItem('smartcutz'))}catch(e){}if(!S||!S.services){S=seed();persist()}
+try{lang=localStorage.getItem('sc-lang')||'en'}catch(e){}
+function persist(){try{localStorage.setItem('smartcutz',JSON.stringify(S))}catch(e){}}
+function toast(m){const e=document.getElementById('toast');e.textContent=m;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),1800)}
+const client=id=>S.clients.find(c=>c.id===id)||{name:'Walk-in',phone:''};
+const barber=id=>S.barbers.find(b=>b.id===id)||{name:t('any')};
+const svc=id=>S.services.find(s=>s.id===id)||{name:'?',price:0,dur:30};
+const sname=s=>lang==='ar'&&s.ar?s.ar:s.name;
+const plan=id=>S.plans.find(p=>p.id===id)||{name:'?'};
+const lastVisit=cid=>S.sales.filter(s=>s.client===cid).map(s=>s.date).sort().pop()||null;
+const clientStatus=cid=>{const lv=lastVisit(cid);if(!lv)return 'New';return daysBetween(lv,today())>35?'Lapsed':'Active'};
+
+let view='dashboard';const NAV=['dashboard','bookings','queue','pos','clients','services','barbers','reports','settings'];
+function toggleLang(){lang=lang==='en'?'ar':'en';try{localStorage.setItem('sc-lang',lang)}catch(e){}render()}
+function go(v){view=v;render()}
+function render(){document.body.dir=lang==='ar'?'rtl':'ltr';document.documentElement.lang=lang;document.getElementById('langbtn').textContent=lang==='en'?'العربية':'English';
+ document.querySelectorAll('[data-t]').forEach(e=>e.textContent=t(e.dataset.t));
+ const counts={queue:S.queue.filter(q=>q.status==='Waiting').length,bookings:S.bookings.filter(b=>b.date===today()&&b.status==='Booked').length};
+ document.getElementById('nav').innerHTML=NAV.map(k=>`<button class="navbtn ${view===k?'active':''}" onclick="go('${k}')"><span>${t(k)}</span>${counts[k]?`<span class="badge">${counts[k]}</span>`:''}</button>`).join('');
+ document.getElementById('main').innerHTML=VIEWS[view]()}
+const VIEWS={};
+
+// ---------------------------------------------------------------- dashboard
+VIEWS.dashboard=()=>{const T=today();const ts_=S.sales.filter(s=>s.date===T);const rev=ts_.reduce((a,s)=>a+s.total,0);const nsvc=ts_.reduce((a,s)=>a+s.items.filter(i=>i.type==='svc').reduce((x,i)=>x+i.qty,0),0);
+ const bk=S.bookings.filter(b=>b.date===T&&b.status==='Booked').sort((a,b)=>a.start-b.start);const wait=S.queue.filter(q=>q.status==='Waiting');
+ const members=S.clients.filter(c=>c.member&&c.member.until>=T).length;const lapsed=S.clients.filter(c=>clientStatus(c.id)==='Lapsed');
+ return `<div class="topbar"><h1>${t('dashboard')}</h1><div class="row"><button class="btn" onclick="openWalkin()">+ ${t('addWalkin')}</button><button class="btn primary" onclick="openBooking()">+ ${t('newBooking')}</button></div></div>
+ <div class="kpis"><div class="kpi"><div class="v">${fmt(rev)}</div><div class="l">${t('todayRev')}</div></div><div class="kpi"><div class="v">${nsvc}</div><div class="l">${t('servicesToday')}</div></div><div class="kpi"><div class="v">${fmt(ts_.length?rev/ts_.length:0)}</div><div class="l">${t('avgTicket')}</div></div>
+ <div class="kpi" style="border-color:var(--red)"><div class="v">${wait.length}</div><div class="l">${t('waiting')}</div></div><div class="kpi" style="border-color:var(--blue)"><div class="v">${bk.length}</div><div class="l">${t('bookedToday')}</div></div><div class="kpi" style="border-color:var(--green)"><div class="v">${members}</div><div class="l">${t('members')}</div></div></div>
+ <div class="two"><div class="panel"><h2>${t('bookings')} · ${t('todayLabel')}</h2><table><tr><th>${t('time')}</th><th>${t('client')}</th><th>${t('service')}</th><th>${t('barber')}</th><th></th></tr>
+  ${bk.map(b=>`<tr><td><b>${hm(b.start)}</b></td><td>${client(b.client).name}</td><td>${sname(svc(b.svc))}</td><td>${barber(b.barber).name}</td><td><button class="btn sm green" onclick="startBooking('${b.id}')">${t('start')}</button></td></tr>`).join('')||`<tr><td colspan=5 class="muted">${t('noData')}</td></tr>`}</table></div>
+ <div class="panel"><h2>${t('lapsed')}</h2><table><tr><th>${t('client')}</th><th>${t('lastVisit')}</th><th></th></tr>${lapsed.map(c=>`<tr><td><b>${c.name}</b><br><span class="muted">${c.phone}</span></td><td>${lastVisit(c.id)||'—'}</td><td><a class="btn sm" target="_blank" href="${waLink(c,`Hi ${c.name.split(' ')[0]}, it's been a while! Your chair at Smart Cutz is waiting — reply to book your usual with ${barber(c.pref).name}. QAR 5 off this week.`)}">${t('remind')}</a></td></tr>`).join('')||`<tr><td colspan=3 class="muted">${t('noData')}</td></tr>`}</table></div></div>`};
+function waLink(c,msg){return `https://wa.me/${(c.phone||'').replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`}
+
+// ---------------------------------------------------------------- bookings
+let bday=today();
+VIEWS.bookings=()=>{const bs=S.barbers.filter(b=>b.on);const o=S.settings.open*60,c=S.settings.close*60,sl=S.settings.slot;const rows=[];for(let m=o;m<c;m+=sl)rows.push(m);
+ const bk=S.bookings.filter(b=>b.date===bday);
+ return `<div class="topbar"><h1>${t('bookings')}</h1><div class="row"><button class="btn sm" onclick="bday=addDays(bday,-1);render()">${t('prev')}</button><input type="date" value="${bday}" style="width:auto" onchange="bday=this.value;render()"><button class="btn sm" onclick="bday=addDays(bday,1);render()">${t('next')}</button><button class="btn sm ghost" onclick="bday=today();render()">${t('todayLabel')}</button><button class="btn primary" onclick="openBooking()">+ ${t('newBooking')}</button></div></div>
+ <div class="panel" style="overflow-x:auto"><div class="sched" style="--n:${bs.length}"><div class="hd"></div>${bs.map(b=>`<div class="hd">${b.name}</div>`).join('')}
+ ${rows.map(m=>`<div class="tm">${hm(m)}</div>${bs.map(b=>{const k=bk.find(x=>x.barber===b.id&&x.start===m);const span=k?Math.max(1,Math.ceil(svc(k.svc).dur/sl)):1;
+  return `<div class="slot ${m%60?'half':''}" onclick="${k?`openBooking('${k.id}')`:`openBooking(null,'${b.id}',${m})`}">${k?`<div class="bk ${k.status.toLowerCase()}" style="height:calc(${span*34}px - 4px)"><b>${client(k.client).name}</b><br>${sname(svc(k.svc))}</div>`:''}</div>`}).join('')}`).join('')}</div>
+ <p class="muted" style="margin-top:8px">${t('bookings')}: ${bk.length} · <span class="tag booked">${ts('Booked')}</span> <span class="tag serving">${ts('Serving')}</span> <span class="tag done">${ts('Done')}</span> <span class="tag noshow">${ts('NoShow')}</span></p></div>`};
+function clientOptions(sel){return S.clients.map(c=>`<option value="${c.id}" ${sel===c.id?'selected':''}>${c.name} · ${c.phone}</option>`).join('')}
+function openBooking(id,barberId,start){const b=id?S.bookings.find(x=>x.id===id):{date:bday,start:start??600,client:S.clients[0].id,barber:barberId||S.barbers[0].id,svc:'s1',status:'Booked'};
+ modal(`<h2>${id?id+' · '+ts(b.status):t('newBooking')}</h2><div class="grid2">
+ <label>${t('client')}<select id="b_c"><option value="">+ ${t('newClient')}</option>${clientOptions(b.client)}</select></label><label>${t('name')} (new)<input id="b_nn"></label><label>${t('phone')} (new)<input id="b_np" placeholder="+974"></label>
+ <label>${t('barber')}<select id="b_b">${S.barbers.filter(x=>x.on).map(x=>`<option value="${x.id}" ${b.barber===x.id?'selected':''}>${x.name}</option>`).join('')}</select></label>
+ <label>${t('service')}<select id="b_s">${S.services.map(s=>`<option value="${s.id}" ${b.svc===s.id?'selected':''}>${sname(s)} — ${s.price}</option>`).join('')}</select></label>
+ <label>${t('date')}<input type="date" id="b_d" value="${b.date}"></label><label>${t('time')}<input type="time" id="b_t" value="${hm(b.start)}" step="900"></label>
+ ${id?`<label>${t('status')}<select id="b_st">${['Booked','Serving','Done','NoShow','Cancelled'].map(s=>`<option value="${s}" ${b.status===s?'selected':''}>${ts(s)}</option>`).join('')}</select></label>`:''}</div>
+ <div class="row"><button class="btn primary" onclick="saveBooking('${id||''}')">${t('save')}</button>${id&&b.status==='Booked'?`<button class="btn green" onclick="startBooking('${id}')">${t('start')} → ${t('checkout')}</button>`:''}<button class="btn" onclick="closeModal()">${t('cancel')}</button>${id?`<button class="btn ghost right" onclick="S.bookings=S.bookings.filter(x=>x.id!=='${id}');persist();closeModal();render()">${t('delete')}</button>`:''}</div>`)}
+function ensureClient(sel,nn,np){let cid=document.getElementById(sel).value;const n=document.getElementById(nn).value.trim();if(!cid&&n){cid='c'+uid();S.clients.push({id:cid,name:n,phone:document.getElementById(np).value.trim(),pref:'',member:null,notes:''})}return cid}
+function saveBooking(id){const cid=ensureClient('b_c','b_nn','b_np');if(!cid)return toast('Client required');const [h,m]=document.getElementById('b_t').value.split(':').map(Number);
+ const o={id:id||'k'+uid(),date:document.getElementById('b_d').value,start:h*60+m,client:cid,barber:document.getElementById('b_b').value,svc:document.getElementById('b_s').value,status:id?document.getElementById('b_st').value:'Booked'};
+ if(id)Object.assign(S.bookings.find(x=>x.id===id),o);else S.bookings.push(o);persist();closeModal();render();toast('✓')}
+function startBooking(id){const b=S.bookings.find(x=>x.id===id);b.status='Serving';persist();cart={client:b.client,barber:b.barber,items:[{id:b.svc,name:sname(svc(b.svc)),price:svc(b.svc).price,qty:1,type:'svc'}],disc:0,method:'cash',booking:id};closeModal();go('pos')}
+
+// ---------------------------------------------------------------- queue
+VIEWS.queue=()=>{const w=S.queue.filter(q=>q.status!=='Done');const busy=S.barbers.filter(b=>b.on).length||1;
+ return `<div class="topbar"><h1>${t('queue')}</h1><button class="btn primary" onclick="openWalkin()">+ ${t('addWalkin')}</button></div>
+ <div class="kpis">${w.sort((a,b)=>a.n-b.n).map((q,i)=>{const est=q.status==='Serving'?0:Math.round(S.queue.filter(x=>x.status==='Waiting'&&x.n<q.n).reduce((a,x)=>a+svc(x.svc).dur,0)/busy+10);
+  return `<div class="qcard"><div class="row"><span class="qn">#${q.n}</span><span class="tag ${q.status.toLowerCase()} right">${ts(q.status)}</span></div><b>${q.name}</b><span class="muted">${sname(svc(q.svc))} · ${q.barber?barber(q.barber).name:t('any')}${q.barberOn?' · '+barber(q.barberOn).name:''}</span>
+  <span class="muted">${q.status==='Waiting'?`${t('estWait')} ~${est} ${t('min')}`:`${t('start')} ${hm(q.at)}`}</span>
+  <div class="row">${q.status==='Waiting'?`<select style="width:auto" id="qb_${q.id}">${S.barbers.filter(b=>b.on).map(b=>`<option value="${b.id}" ${q.barber===b.id?'selected':''}>${b.name}</option>`).join('')}</select><button class="btn sm green" onclick="startQueue('${q.id}')">${t('start')}</button><button class="btn sm ghost" onclick="S.queue=S.queue.filter(x=>x.id!=='${q.id}');persist();render()">${t('noShow')}</button>`:`<button class="btn sm primary" onclick="checkoutQueue('${q.id}')">${t('checkout')}</button>`}</div></div>`}).join('')||`<p class="muted">${t('noData')}</p>`}</div>`};
+function openWalkin(){modal(`<h2>${t('addWalkin')}</h2><div class="grid2"><label>${t('name')}<input id="w_n" value="Walk-in"></label><label>${t('phone')}<input id="w_p" placeholder="+974"></label><label>${t('service')}<select id="w_s">${S.services.map(s=>`<option value="${s.id}">${sname(s)} — ${s.price}</option>`).join('')}</select></label><label>${t('barber')}<select id="w_b"><option value="">${t('any')}</option>${S.barbers.filter(b=>b.on).map(b=>`<option value="${b.id}">${b.name}</option>`).join('')}</select></label></div>
+ <div class="row"><button class="btn primary" onclick="S.queue.push({id:'q'+uid(),n:S.qn++,name:document.getElementById('w_n').value,phone:document.getElementById('w_p').value,barber:document.getElementById('w_b').value,svc:document.getElementById('w_s').value,status:'Waiting',at:nowHM()});persist();closeModal();go('queue')">${t('save')}</button><button class="btn" onclick="closeModal()">${t('cancel')}</button></div>`)}
+function startQueue(id){const q=S.queue.find(x=>x.id===id);q.status='Serving';q.barberOn=document.getElementById('qb_'+id).value;q.at=nowHM();persist();render()}
+function checkoutQueue(id){const q=S.queue.find(x=>x.id===id);let cid=S.clients.find(c=>c.phone&&c.phone===q.phone)?.id||'';cart={client:cid,barber:q.barberOn,items:[{id:q.svc,name:sname(svc(q.svc)),price:svc(q.svc).price,qty:1,type:'svc'}],disc:0,method:'cash',queue:id,walkName:q.name};go('pos')}
+
+// ---------------------------------------------------------------- POS
+let cart={client:'',barber:S.barbers[0].id,items:[],disc:0,method:'cash'};
+VIEWS.pos=()=>{const tot=cart.items.reduce((a,i)=>a+i.price*i.qty,0)-(+cart.disc||0);const c=cart.client?client(cart.client):null;const mem=c&&c.member&&c.member.until>=today()&&c.member.left>0?c.member:null;
+ return `<div class="topbar"><h1>${t('pos')}</h1></div><div class="pos"><div style="display:grid;gap:14px">
+ ${['Smart','Relax','Signature','Kids'].map(l=>`<div><div class="muted" style="margin-bottom:6px;font-weight:500">${tl(l)}</div><div class="svcgrid">${S.services.filter(s=>s.line===l).map(s=>`<div class="svc line" onclick="addItem('${s.id}','svc')"><span>${sname(s)}</span><span class="p">${s.price}</span><span class="muted">${s.dur} ${t('min')}</span></div>`).join('')}</div></div>`).join('')}
+ <div><div class="muted" style="margin-bottom:6px;font-weight:500">${tl('Retail')}</div><div class="svcgrid">${S.products.map(p=>`<div class="svc" onclick="addItem('${p.id}','prod')"><span>${sname(p)}</span><span class="p">${p.price}</span><span class="muted">${t('stock')}: ${p.stock}</span></div>`).join('')}</div></div></div>
+ <div class="cart"><h2>${t('cart')}</h2>
+  <label>${t('client')}<select onchange="cart.client=this.value;render()"><option value="">${cart.walkName||'Walk-in'}</option>${clientOptions(cart.client)}</select></label>
+  <label>${t('barber')}<select onchange="cart.barber=this.value">${S.barbers.filter(b=>b.on).map(b=>`<option value="${b.id}" ${cart.barber===b.id?'selected':''}>${b.name}</option>`).join('')}</select></label>
+  ${mem?`<div class="row"><span class="tag member">${plan(mem.plan).name} · ${mem.left} ${t('visitsLeft')}</span><button class="btn sm" onclick="redeemMember()">${t('redeem')}</button></div>`:''}
+  <table>${cart.items.map((i,x)=>`<tr><td>${i.name}${i.free?' <span class="tag member">'+t('membership')+'</span>':''}</td><td><input type="number" value="${i.qty}" style="width:60px" onchange="cart.items[${x}].qty=+this.value;render()"></td><td>${fmt(i.price*i.qty)}</td><td><button class="btn sm ghost" onclick="cart.items.splice(${x},1);render()">×</button></td></tr>`).join('')||`<tr><td class="muted">${t('noData')}</td></tr>`}</table>
+  <div class="grid2"><label>${t('discount')}<input type="number" value="${cart.disc}" onchange="cart.disc=+this.value;render()"></label><label>${t('method')}<select onchange="cart.method=this.value"><option value="cash" ${cart.method==='cash'?'selected':''}>${t('cash')}</option><option value="card" ${cart.method==='card'?'selected':''}>${t('card')}</option></select></label></div>
+  <div class="tot">${fmt(tot)}</div>
+  <div class="row"><button class="btn primary" style="flex:1" onclick="pay()" ${cart.items.length?'':'disabled'}>${t('pay')}</button><button class="btn ghost" onclick="cart={client:'',barber:S.barbers[0].id,items:[],disc:0,method:'cash'};render()">${t('clearCart')}</button></div></div></div>`};
+function addItem(id,type){const src=type==='svc'?svc(id):S.products.find(p=>p.id===id);const ex=cart.items.find(i=>i.id===id&&!i.free);if(ex)ex.qty++;else cart.items.push({id,name:sname(src),price:src.price,qty:1,type});render()}
+function redeemMember(){const c=client(cart.client);const p=plan(c.member.plan);const sid=p.id==='pl2'?'s6':p.id==='pl3'?'s9':'s1';const s=svc(sid);cart.items.push({id:sid,name:sname(s),price:0,qty:1,type:'svc',free:true});c.member.left--;persist();render()}
+function pay(){const tot=cart.items.reduce((a,i)=>a+i.price*i.qty,0)-(+cart.disc||0);const d=new Date();const sale={id:'R'+uid(),date:today(),time:hm(d.getHours()*60+d.getMinutes()),client:cart.client||null,barber:cart.barber,items:cart.items,method:cart.method,disc:cart.disc,total:tot,walkName:cart.walkName};
+ S.sales.push(sale);cart.items.filter(i=>i.type==='prod').forEach(i=>{const p=S.products.find(x=>x.id===i.id);if(p)p.stock=Math.max(0,p.stock-i.qty)});
+ if(cart.booking){const b=S.bookings.find(x=>x.id===cart.booking);if(b)b.status='Done'}if(cart.queue){const q=S.queue.find(x=>x.id===cart.queue);if(q)q.status='Done'}
+ persist();const c=cart.client?client(cart.client):null;cart={client:'',barber:S.barbers[0].id,items:[],disc:0,method:'cash'};
+ modal(`<h2>${t('receipt')} · ${sale.id}</h2><div class="muted">${S.settings.name} · ${S.settings.cr} · ${sale.date} ${sale.time} · ${barber(sale.barber).name}</div><table>${sale.items.map(i=>`<tr><td>${i.name} ×${i.qty}</td><td style="text-align:end">${fmt(i.price*i.qty)}</td></tr>`).join('')}${sale.disc?`<tr><td>${t('discount')}</td><td style="text-align:end">−${fmt(sale.disc)}</td></tr>`:''}<tr><td><b>${t('total')}</b> (${t(sale.method)})</td><td style="text-align:end"><b>${fmt(sale.total)}</b></td></tr></table><p class="muted">${t('thanks')}</p>
+ <div class="row"><button class="btn ghost" onclick="window.print()">${t('receipt')} PDF</button>${c&&c.phone?`<a class="btn" target="_blank" href="${waLink(c,`${S.settings.name}: ${t('thanks')} ${t('receipt')} ${sale.id} — ${fmt(sale.total)}. Book your next visit: reply here.`)}">WhatsApp</a>`:''}<button class="btn primary right" onclick="closeModal();go('dashboard')">${t('done')}</button></div>`);toast(fmt(sale.total)+' ✓')}
+
+// ---------------------------------------------------------------- clients
+let cq='';
+VIEWS.clients=()=>`<div class="topbar"><h1>${t('clients')}</h1><div class="row"><input placeholder="${t('name')} / ${t('phone')}" value="${cq}" oninput="cq=this.value;render()" style="width:240px"><button class="btn primary" onclick="openClient()">+ ${t('newClient')}</button></div></div>
+ <div class="panel"><table><tr><th>${t('name')}</th><th>${t('phone')}</th><th>${t('prefBarber')}</th><th>${t('visits')}</th><th>${t('lastVisit')}</th><th>${t('spent')}</th><th>${t('membership')}</th><th>${t('status')}</th><th></th></tr>
+ ${S.clients.filter(c=>!cq||(c.name+c.phone).toLowerCase().includes(cq.toLowerCase())).map(c=>{const ss=S.sales.filter(s=>s.client===c.id);const st=clientStatus(c.id);const lv=lastVisit(c.id);const due=lv&&daysBetween(lv,today())>=21&&st!=='Lapsed';
+  return `<tr><td><b>${c.name}</b>${c.notes?`<br><span class="muted">${c.notes}</span>`:''}</td><td>${c.phone}</td><td>${c.pref?barber(c.pref).name:'—'}</td><td>${ss.length}</td><td>${lv||'—'}${due?` <span class="tag waiting">${t('dueBack')}</span>`:''}</td><td>${fmt(ss.reduce((a,s)=>a+s.total,0))}</td><td>${c.member&&c.member.until>=today()?`<span class="tag member">${plan(c.member.plan).name} · ${c.member.left}</span>`:'—'}</td><td><span class="tag ${st.toLowerCase()}">${ts(st)||st}</span></td>
+  <td class="row"><button class="btn sm" onclick="openClient('${c.id}')">✎</button>${c.phone?`<a class="btn sm ghost" target="_blank" href="${waLink(c,`Hi ${c.name.split(' ')[0]}, time for your next cut at Smart Cutz? Reply with a day and time and we'll hold your chair${c.pref?' with '+barber(c.pref).name:''}.`)}">WA</a>`:''}</td></tr>`}).join('')}</table></div>`;
+function openClient(id){const c=id?S.clients.find(x=>x.id===id):{name:'',phone:'',pref:'',member:null,notes:''};
+ modal(`<h2>${id?c.name:t('newClient')}</h2><div class="grid2"><label>${t('name')}<input id="c_n" value="${esc(c.name)}"></label><label>${t('phone')}<input id="c_p" value="${esc(c.phone)}"></label><label>${t('prefBarber')}<select id="c_b"><option value="">—</option>${S.barbers.map(b=>`<option value="${b.id}" ${c.pref===b.id?'selected':''}>${b.name}</option>`).join('')}</select></label>
+ <label>${t('sell')}<select id="c_m"><option value="">—</option>${S.plans.map(p=>`<option value="${p.id}">${p.name} — ${p.price}/mo · ${p.visits} ${t('visits')}</option>`).join('')}</select></label></div><label>${t('notes')}<input id="c_no" value="${esc(c.notes)}"></label>
+ ${c.member?`<p class="muted">${t('membership')}: ${plan(c.member.plan).name} · ${c.member.left} ${t('visitsLeft')} · ${c.member.until}</p>`:''}
+ <div class="row"><button class="btn primary" onclick="saveClient('${id||''}')">${t('save')}</button><button class="btn" onclick="closeModal()">${t('cancel')}</button></div>`)}
+function saveClient(id){const o={name:document.getElementById('c_n').value,phone:document.getElementById('c_p').value,pref:document.getElementById('c_b').value,notes:document.getElementById('c_no').value};const pm=document.getElementById('c_m').value;
+ let c;if(id){c=S.clients.find(x=>x.id===id);Object.assign(c,o)}else{c={id:'c'+uid(),member:null,...o};S.clients.push(c)}
+ if(pm){const p=plan(pm);c.member={plan:pm,left:p.visits,until:addDays(today(),30)};S.sales.push({id:'R'+uid(),date:today(),time:'',client:c.id,barber:S.barbers[0].id,items:[{id:pm,name:p.name,price:p.price,qty:1,type:'member'}],method:'card',disc:0,total:p.price})}
+ persist();closeModal();render();toast('✓')}
+
+// ---------------------------------------------------------------- services & barbers
+VIEWS.services=()=>`<div class="topbar"><h1>${t('services')}</h1></div><div class="two"><div class="panel"><h2>${t('service')}</h2><table><tr><th>${t('service')}</th><th>${t('line')}</th><th>${t('price')}</th><th>${t('duration')}</th><th></th></tr>
+ ${S.services.map((s,i)=>`<tr><td><input value="${esc(s.name)}" onchange="S.services[${i}].name=this.value;persist()"></td><td><select onchange="S.services[${i}].line=this.value;persist()">${['Smart','Relax','Signature','Kids'].map(l=>`<option ${s.line===l?'selected':''} value="${l}">${tl(l)}</option>`).join('')}</select></td><td><input type="number" value="${s.price}" style="width:80px" onchange="S.services[${i}].price=+this.value;persist()"></td><td><input type="number" value="${s.dur}" style="width:70px" onchange="S.services[${i}].dur=+this.value;persist()"></td><td><button class="btn sm ghost" onclick="S.services.splice(${i},1);persist();render()">×</button></td></tr>`).join('')}</table>
+ <button class="btn sm" style="margin-top:10px" onclick="S.services.push({id:'s'+uid(),name:'New service',ar:'',line:'Smart',price:25,dur:30});persist();render()">+ ${t('addService')}</button></div>
+ <div class="panel"><h2>${t('product')}</h2><table><tr><th>${t('product')}</th><th>${t('price')}</th><th>${t('stock')}</th><th></th></tr>${S.products.map((p,i)=>`<tr><td><input value="${esc(p.name)}" onchange="S.products[${i}].name=this.value;persist()"></td><td><input type="number" value="${p.price}" style="width:80px" onchange="S.products[${i}].price=+this.value;persist()"></td><td><input type="number" value="${p.stock}" style="width:70px" onchange="S.products[${i}].stock=+this.value;persist()"></td><td><button class="btn sm ghost" onclick="S.products.splice(${i},1);persist();render()">×</button></td></tr>`).join('')}</table>
+ <button class="btn sm" style="margin-top:10px" onclick="S.products.push({id:'p'+uid(),name:'New product',ar:'',price:30,stock:10,cost:15});persist();render()">+ ${t('addProduct')}</button></div></div>`;
+VIEWS.barbers=()=>{const m=today().slice(0,7);return `<div class="topbar"><h1>${t('barbers')}</h1><button class="btn primary" onclick="S.barbers.push({id:'b'+uid(),name:'New barber',comm:30,on:true});persist();render()">+ ${t('barber')}</button></div><div class="panel"><table><tr><th>${t('name')}</th><th>${t('commission')}</th><th>${t('status')}</th><th>${t('takingsBy')}</th><th>${t('commissionRep')}</th><th></th></tr>
+ ${S.barbers.map((b,i)=>{const rev=S.sales.filter(s=>s.barber===b.id&&s.date.slice(0,7)===m).reduce((a,s)=>a+s.items.filter(x=>x.type==='svc').reduce((y,x)=>y+x.price*x.qty,0),0);return `<tr><td><input value="${esc(b.name)}" onchange="S.barbers[${i}].name=this.value;persist()"></td><td><input type="number" value="${b.comm}" style="width:70px" onchange="S.barbers[${i}].comm=+this.value;persist()"></td><td><button class="btn sm ${b.on?'green':'ghost'}" onclick="S.barbers[${i}].on=!S.barbers[${i}].on;persist();render()">${b.on?ts('Active'):'Off'}</button></td><td>${fmt(rev)}</td><td><b>${fmt(rev*b.comm/100)}</b></td><td><button class="btn sm ghost" onclick="S.barbers.splice(${i},1);persist();render()">×</button></td></tr>`}).join('')}</table></div>`};
+
+// ---------------------------------------------------------------- reports
+VIEWS.reports=()=>{const T=today(),m=T.slice(0,7);const ms=S.sales.filter(s=>s.date.slice(0,7)===m);const rev=ms.reduce((a,s)=>a+s.total,0);
+ const retail=ms.reduce((a,s)=>a+s.items.filter(i=>i.type==='prod').reduce((x,i)=>x+i.price*i.qty,0),0);
+ const days=[...Array(7)].map((_,i)=>addDays(T,-6+i)).map(d=>({d,v:S.sales.filter(s=>s.date===d).reduce((a,s)=>a+s.total,0)}));const mx=Math.max(1,...days.map(x=>x.v));
+ const mix={};ms.forEach(s=>s.items.filter(i=>i.type==='svc').forEach(i=>{const l=svc(i.id).line||'Smart';mix[l]=(mix[l]||0)+i.price*i.qty}));
+ const active=S.clients.filter(c=>clientStatus(c.id)==='Active').length,lapsed=S.clients.filter(c=>clientStatus(c.id)==='Lapsed').length;
+ const byB=S.barbers.map(b=>({b,v:ms.filter(s=>s.barber===b.id).reduce((a,s)=>a+s.total,0)}));
+ return `<div class="topbar"><h1>${t('reports')}</h1><span class="muted">${m}</span></div>
+ <div class="kpis"><div class="kpi"><div class="v">${fmt(rev)}</div><div class="l">${t('total')} · ${m}</div></div><div class="kpi"><div class="v">${fmt(ms.length?rev/ms.length:0)}</div><div class="l">${t('avgTicket')}</div></div><div class="kpi" style="border-color:var(--green)"><div class="v">${rev?Math.round(retail/rev*100):0}%</div><div class="l">${t('retailShare')} · ${fmt(retail)}</div></div><div class="kpi" style="border-color:var(--blue)"><div class="v">${active+lapsed?Math.round(active/(active+lapsed)*100):0}%</div><div class="l">${t('retention')} · ${active} ${ts('Active')} / ${lapsed} ${ts('Lapsed')}</div></div></div>
+ <div class="two"><div class="panel"><h2>${t('daily')}</h2><table>${days.map(x=>`<tr><td style="width:110px">${x.d.slice(5)}</td><td><div class="bar"><i style="width:${x.v/mx*100}%"></i></div></td><td style="width:110px;text-align:end"><b>${fmt(x.v)}</b></td></tr>`).join('')}</table></div>
+ <div class="panel"><h2>${t('takingsBy')}</h2><table>${byB.map(x=>`<tr><td style="width:110px">${x.b.name}</td><td><div class="bar"><i style="width:${rev?x.v/rev*100:0}%"></i></div></td><td style="width:110px;text-align:end"><b>${fmt(x.v)}</b></td></tr>`).join('')}</table>
+ <h2 style="margin-top:16px">${t('serviceMix')}</h2><table>${Object.entries(mix).map(([l,v])=>`<tr><td style="width:110px">${tl(l)}</td><td><div class="bar"><i style="width:${v/Math.max(1,...Object.values(mix))*100}%"></i></div></td><td style="width:110px;text-align:end"><b>${fmt(v)}</b></td></tr>`).join('')}</table></div></div>`};
+
+// ---------------------------------------------------------------- settings
+VIEWS.settings=()=>`<div class="topbar"><h1>${t('settings')}</h1><button class="btn ghost" onclick="if(confirm('Reset demo data?')){S=seed();persist();render()}">Reset demo data</button></div><div class="two"><div class="panel"><div class="grid2">
+ <label>${t('salonName')}<input value="${esc(S.settings.name)}" onchange="S.settings.name=this.value;persist()"></label><label>C.R.<input value="${esc(S.settings.cr)}" onchange="S.settings.cr=this.value;persist()"></label><label>${t('phone')}<input value="${esc(S.settings.phone)}" onchange="S.settings.phone=this.value;persist()"></label>
+ <label>${t('open')}<input type="number" value="${S.settings.open}" onchange="S.settings.open=+this.value;persist()"></label><label>${t('close')}<input type="number" value="${S.settings.close}" onchange="S.settings.close=+this.value;persist()"></label><label>${t('slot')}<input type="number" value="${S.settings.slot}" onchange="S.settings.slot=+this.value;persist()"></label></div></div>
+ <div class="panel"><h2>${t('plans')}</h2><table><tr><th>${t('planName')}</th><th>${t('price')}</th><th>${t('visits2')}</th></tr>${S.plans.map((p,i)=>`<tr><td><input value="${esc(p.name)}" onchange="S.plans[${i}].name=this.value;persist()"></td><td><input type="number" value="${p.price}" style="width:80px" onchange="S.plans[${i}].price=+this.value;persist()"></td><td><input type="number" value="${p.visits}" style="width:70px" onchange="S.plans[${i}].visits=+this.value;persist()"></td></tr>`).join('')}</table></div></div>`;
+
+function modal(h){document.getElementById('modal').innerHTML=h;document.getElementById('modalbg').classList.add('open')}
+function closeModal(){document.getElementById('modalbg').classList.remove('open')}
+function esc(s){return String(s??'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}
+render();
+</script>
+</body>
+</html>
